@@ -4,6 +4,7 @@ local Logger = require('harpoon.logger')
 
 ---@class HarpoonUI
 ---@field win_id number
+---@field border_win_id number
 ---@field bufnr number
 ---@field settings HarpoonSettings
 ---@field active_list HarpoonList
@@ -71,11 +72,13 @@ function HarpoonUI:_create_window()
         width = math.floor(win[1].width * self.settings.ui_width_ratio)
     end
 
+    -- local title_width = width / 2
+
     local height = 8
     local borderchars = self.settings.border_chars
     local bufnr = vim.api.nvim_create_buf(false, false)
     local _, popup_info = popup.create(bufnr, {
-        title = 'Harpoon',
+        title = '                               Harpoon                               ',
         highlight = 'HarpoonWindow',
         borderhighlight = 'HarpoonBorder',
         titlehighlight = 'HarpoonTitle',
