@@ -81,7 +81,7 @@ function HarpoonUI:_create_window()
          minwidth = width,
          titlehighlight = 'HarpoonTitle',
          borderhighlight = 'HarpoonBorderOuter',
-         highlight = 'HarpoonBorderOuter',
+         highlight = '#222222',
       }),
       highlight = 'HarpoonWindow',
       borderhighlight = 'HarpoonBorder',
