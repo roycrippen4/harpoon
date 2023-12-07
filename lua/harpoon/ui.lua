@@ -99,7 +99,7 @@ function HarpoonUI:_create_title_window()
         title = "Roy's Harpoon",
         titlehighlight = 'HarpoonTitle',
         highlight = 'HarpoonWindow',
-        line = math.floor(((vim.o.lines - height) / 2)),
+        line = math.floor((vim.o.lines - height)),
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
         minheight = height,
