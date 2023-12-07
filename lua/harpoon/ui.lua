@@ -22,7 +22,7 @@ HarpoonUI.__index = HarpoonUI
 function HarpoonUI:new(settings)
     return setmetatable({
         win_id = nil,
-        -- border_win_id = nil,
+        border_win_id = nil,
         bufnr = nil,
         active_list = nil,
         settings = settings,
@@ -48,13 +48,13 @@ function HarpoonUI:close_menu()
         vim.api.nvim_win_close(self.win_id, true)
     end
 
-    -- if self.border_win_id ~= nil and vim.api.nvim_win_is_valid(self.border_win_id) then
-    --     vim.api.nvim_win_close(self.border_win_id, true)
-    -- end
+    if self.border_win_id ~= nil and vim.api.nvim_win_is_valid(self.border_win_id) then
+        vim.api.nvim_win_close(self.border_win_id, true)
+    end
 
     self.active_list = nil
     self.win_id = nil
-    -- self.border_win_id = nil
+    self.border_win_id = nil
     self.bufnr = nil
 
     self.closing = false
@@ -72,25 +72,25 @@ function HarpoonUI:_create_window()
     end
 
     local height = 8
-    -- local borderchars = self.settings.border_chars
+    local borderchars = self.settings.border_chars
     local bufnr = vim.api.nvim_create_buf(false, false)
     local _, popup_info = popup.create(bufnr, {
         title = 'Harpoon',
         highlight = 'HarpoonWindow',
-        -- borderhighlight = 'HarpoonBorder',
+        borderhighlight = 'HarpoonBorder',
         titlehighlight = 'HarpoonTitle',
         line = math.floor(((vim.o.lines - height) / 2) - 1),
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
         minheight = height,
-        -- borderchars = borderchars,
+        borderchars = borderchars,
     })
     local win_id = popup_info.win_id
 
     Buffer.setup_autocmds_and_keymaps(bufnr)
 
     self.win_id = win_id
-    -- self.border_win_id = popup_info.border.win_id
+    self.border_win_id = popup_info.border.win_id
     vim.api.nvim_win_set_option(win_id, 'number', true)
 
     return win_id, bufnr

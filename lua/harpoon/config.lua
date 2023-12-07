@@ -55,16 +55,16 @@ function M.get_default_config()
 
         settings = {
             save_on_toggle = false,
-            -- border_chars = {
-            --     '─',
-            --     '│',
-            --     '─',
-            --     '│',
-            --     '╭',
-            --     '╮',
-            --     '╯',
-            --     '╰',
-            -- },
+            border_chars = {
+                '─',
+                '│',
+                '─',
+                '│',
+                '╭',
+                '╮',
+                '╯',
+                '╰',
+            },
             ui_fallback_width = 69,
             ui_width_ratio = 0.62569,
             key = function()
