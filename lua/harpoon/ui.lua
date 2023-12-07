@@ -4,11 +4,8 @@ local Logger = require('harpoon.logger')
 
 ---@class HarpoonUI
 ---@field win_id number
----@field title_id number
 ---@field border_win_id number
----@field title_border_win_id number
 ---@field bufnr number
----@field title_bufnr number
 ---@field settings HarpoonSettings
 ---@field active_list HarpoonList
 local HarpoonUI = {}
@@ -26,11 +23,8 @@ HarpoonUI.__index = HarpoonUI
 function HarpoonUI:new(settings)
     return setmetatable({
         win_id = nil,
-        title_id = nil,
         border_win_id = nil,
-        title_border_win_id = nil,
         bufnr = nil,
-        title_bufnr = nil,
         active_list = nil,
         settings = settings,
     }, self)
@@ -51,10 +45,6 @@ function HarpoonUI:close_menu()
         vim.api.nvim_buf_delete(self.bufnr, { force = true })
     end
 
-    if self.title_bufnr ~= nil and vim.api.nvim_buf_is_valid(self.title_bufnr) then
-        vim.api.nvim_buf_delete(self.title_bufnr, { force = true })
-    end
-
     if self.win_id ~= nil and vim.api.nvim_win_is_valid(self.win_id) then
         vim.api.nvim_win_close(self.win_id, true)
     end
@@ -63,57 +53,12 @@ function HarpoonUI:close_menu()
         vim.api.nvim_win_close(self.border_win_id, true)
     end
 
-    if self.title_id ~= nil and vim.api.nvim_win_is_valid(self.title_id) then
-        vim.api.nvim_win_close(self.title_id, true)
-    end
-
-    if self.title_border_win_id ~= nil and vim.api.nvim_win_is_valid(self.border_win_id) then
-        vim.api.nvim_win_close(self.title_border_win_id, true)
-    end
-
     self.active_list = nil
     self.win_id = nil
-    self.title_id = nil
     self.border_win_id = nil
-    self.title_border_win_id = nil
-    self.title_bufnr = nil
     self.bufnr = nil
 
     self.closing = false
-end
-
-function HarpoonUI:_create_title_window()
-    local win = vim.api.nvim_list_uis()
-
-    local width = self.settings.ui_fallback_width
-    if #win > 0 then
-        -- no ackshual reason for 0.62569, just looks complicated, and i want
-        -- to make my boss think i am smart
-        width = math.floor(win[1].width * self.settings.ui_width_ratio)
-    end
-
-    local height = 1
-    local borderchars = self.settings.border_chars
-    local bufnr = vim.api.nvim_create_buf(false, false)
-    local _, popup_info = popup.create(bufnr, {
-        title = "Roy's Harpoon",
-        titlehighlight = 'HarpoonTitle',
-        highlight = 'HarpoonWindow',
-        line = math.floor((vim.o.lines - height)),
-        col = math.floor((vim.o.columns - width) / 2),
-        minwidth = width,
-        minheight = height,
-        borderchars = borderchars,
-    })
-    local win_id = popup_info.win_id
-
-    Buffer.setup_autocmds_and_keymaps(bufnr)
-
-    self.title_id = win_id
-    self.title_border_win_id = popup_info.border.win_id
-    vim.api.nvim_win_set_option(win_id, 'number', true)
-
-    return win_id, bufnr
 end
 
 ---@return number,number
@@ -131,10 +76,10 @@ function HarpoonUI:_create_window()
     local borderchars = self.settings.border_chars
     local bufnr = vim.api.nvim_create_buf(false, false)
     local _, popup_info = popup.create(bufnr, {
-        -- title = 'Harpoon',
-        -- titlehighlight = 'HarpoonTitle',
+        title = 'Harpoon',
         highlight = 'HarpoonWindow',
         borderhighlight = 'HarpoonBorder',
+        titlehighlight = 'HarpoonTitle',
         line = math.floor(((vim.o.lines - height) / 2) - 1),
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
@@ -165,7 +110,6 @@ function HarpoonUI:toggle_quick_menu(list)
 
     Logger:log('ui#toggle_quick_menu#opening', list and list.name)
     local win_id, bufnr = self:_create_window()
-    local title_id, title_bufnr = self:_create_title_window()
 
     self.win_id = win_id
     self.bufnr = bufnr
