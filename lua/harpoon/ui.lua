@@ -75,7 +75,7 @@ function HarpoonUI:_create_window()
     -- local title_width = width / 2
 
     local height = 8
-    -- local borderchars = self.settings.border_chars
+    local borderchars = self.settings.border_chars
     local bufnr = vim.api.nvim_create_buf(false, false)
     local _, popup_info = popup.create(bufnr, {
         title = '                                                                            Harpoon                                                                            ',
@@ -86,7 +86,7 @@ function HarpoonUI:_create_window()
         col = math.floor((vim.o.columns - width) / 2),
         minwidth = width,
         minheight = height,
-        -- borderchars = borderchars,
+        borderchars = borderchars,
     })
     local win_id = popup_info.win_id
 
