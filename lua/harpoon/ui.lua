@@ -76,13 +76,8 @@ function HarpoonUI:_create_window()
    local borderchars = self.settings.border_chars
    local bufnr = vim.api.nvim_create_buf(false, false)
    local _, popup_info = popup.create(bufnr, {
-      popup.create(bufnr, {
-         title = 'Harpoon',
-         minwidth = width,
-         titlehighlight = 'HarpoonTitle',
-         borderhighlight = 'HarpoonBorderOuter',
-         highlight = '#222222',
-      }),
+      title = 'Harpoon',
+      titlehighlight = 'HarpoonTitle',
       highlight = 'HarpoonWindow',
       borderhighlight = 'HarpoonBorder',
       line = math.floor(((vim.o.lines - height) / 2) - 1),
