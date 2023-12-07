@@ -1,38 +1,38 @@
-local utils = require("harpoon.test.utils")
-local Buffer = require("harpoon.buffer")
-local harpoon = require("harpoon")
+local utils = require('harpoon.test.utils')
+local Buffer = require('harpoon.buffer')
+local harpoon = require('harpoon')
 
 local eq = assert.are.same
 local be = utils.before_each(os.tmpname())
 
-describe("harpoon", function()
+describe('harpoon', function()
     before_each(function()
         be()
-        harpoon = require("harpoon")
+        harpoon = require('harpoon')
     end)
 
-    it("open the ui without any items in the list", function()
+    it('open the ui without any items in the list', function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
 
         local bufnr = harpoon.ui.bufnr
         local win_id = harpoon.ui.win_id
-        local border_win_id = harpoon.ui.border_win_id
+        -- local border_win_id = harpoon.ui.border_win_id
 
         eq(vim.api.nvim_buf_is_valid(bufnr), true)
         eq(vim.api.nvim_win_is_valid(win_id), true)
-        eq(vim.api.nvim_win_is_valid(border_win_id), true)
+        -- eq(vim.api.nvim_win_is_valid(border_win_id), true)
 
         harpoon.ui:toggle_quick_menu()
 
         eq(vim.api.nvim_buf_is_valid(bufnr), false)
         eq(vim.api.nvim_win_is_valid(win_id), false)
-        eq(vim.api.nvim_win_is_valid(border_win_id), false)
+        -- eq(vim.api.nvim_win_is_valid(border_win_id), false)
         eq(harpoon.ui.bufnr, nil)
         eq(harpoon.ui.win_id, nil)
-        eq(harpoon.ui.border_win_id, nil)
+        -- eq(harpoon.ui.border_win_id, nil)
     end)
 
-    it("delete file from ui contents and save", function()
+    it('delete file from ui contents and save', function()
         local created_files = utils.fill_list_with_files(3, harpoon:list())
         eq(harpoon:list():length(), 3)
 
@@ -46,7 +46,7 @@ describe("harpoon", function()
         eq(harpoon:list():display(), created_files)
     end)
 
-    it("add file from ui contents and save", function()
+    it('add file from ui contents and save', function()
         local list = harpoon:list()
         local created_files = utils.fill_list_with_files(3, list)
         table.insert(created_files, os.tmpname())
@@ -62,7 +62,7 @@ describe("harpoon", function()
         eq(list:display(), created_files)
     end)
 
-    it("edit ui but toggle should not save", function()
+    it('edit ui but toggle should not save', function()
         local list = harpoon:list()
         local created_files = utils.fill_list_with_files(3, list)
 
@@ -76,7 +76,7 @@ describe("harpoon", function()
         eq(created_files, list:display())
     end)
 
-    it("using :q to leave harpoon should quit everything", function()
+    it('using :q to leave harpoon should quit everything', function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
 
         local bufnr = harpoon.ui.bufnr
@@ -94,20 +94,17 @@ describe("harpoon", function()
         eq(harpoon.ui.win_id, nil)
     end)
 
-    it(
-        "closing toggle_quick_menu with save_on_toggle should save contents",
-        function()
-            harpoon:setup({ settings = { save_on_toggle = true } })
-            local list = harpoon:list()
-            local created_files = utils.fill_list_with_files(3, list)
+    it('closing toggle_quick_menu with save_on_toggle should save contents', function()
+        harpoon:setup({ settings = { save_on_toggle = true } })
+        local list = harpoon:list()
+        local created_files = utils.fill_list_with_files(3, list)
 
-            harpoon.ui:toggle_quick_menu(list)
-            table.remove(created_files, 2)
-            Buffer.set_contents(harpoon.ui.bufnr, created_files)
-            harpoon.ui:toggle_quick_menu()
+        harpoon.ui:toggle_quick_menu(list)
+        table.remove(created_files, 2)
+        Buffer.set_contents(harpoon.ui.bufnr, created_files)
+        harpoon.ui:toggle_quick_menu()
 
-            eq(list:length(), 2)
-            eq(list:display(), created_files)
-        end
-    )
+        eq(list:length(), 2)
+        eq(list:display(), created_files)
+    end)
 end)

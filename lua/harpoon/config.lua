@@ -25,7 +25,6 @@ M.DEFAULT_LIST = DEFAULT_LIST
 ---@field get_root_dir? fun(): string
 
 ---@class HarpoonSettings
----@field border_chars string[] defaults to { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 ---@field save_on_toggle boolean defaults to true
 ---@field ui_fallback_width number defaults 69, nice
 ---@field ui_width_ratio number defaults to 0.62569
@@ -56,16 +55,16 @@ function M.get_default_config()
 
         settings = {
             save_on_toggle = false,
-            border_chars = {
-                '─',
-                '│',
-                '─',
-                '│',
-                '╭',
-                '╮',
-                '╯',
-                '╰',
-            },
+            -- border_chars = {
+            --     '─',
+            --     '│',
+            --     '─',
+            --     '│',
+            --     '╭',
+            --     '╮',
+            --     '╯',
+            --     '╰',
+            -- },
             ui_fallback_width = 69,
             ui_width_ratio = 0.62569,
             key = function()
