@@ -43,7 +43,7 @@ local function create_window()
     borderchars = borderchars,
   })
 
-  vim.api.nvim_win_set_option(win.border.win_id, 'winhl', 'Normal:HarpoonBorder')
+  vim.api.nvim_set_option_value('winhl', 'Normal:HarpoonBorder', { win = win.border.win_id })
 
   return {
     bufnr = bufnr,
@@ -100,12 +100,12 @@ function M.toggle_quick_menu()
     contents[idx] = string.format('%s', file)
   end
 
-  vim.api.nvim_win_set_option(Harpoon_win_id, 'number', true)
+  vim.api.nvim_set_option_value('number', true, { win = Harpoon_win_id })
   vim.api.nvim_buf_set_name(Harpoon_bufh, 'harpoon-menu')
   vim.api.nvim_buf_set_lines(Harpoon_bufh, 0, #contents, false, contents)
-  vim.api.nvim_buf_set_option(Harpoon_bufh, 'filetype', 'harpoon')
-  vim.api.nvim_buf_set_option(Harpoon_bufh, 'buftype', 'acwrite')
-  vim.api.nvim_buf_set_option(Harpoon_bufh, 'bufhidden', 'delete')
+  vim.api.nvim_set_option_value('filetype', 'harpoon', { buf = Harpoon_bufh })
+  vim.api.nvim_set_option_value('buftype', 'acwrite', { buf = Harpoon_bufh })
+  vim.api.nvim_set_option_value('bufhidden', 'delete', { buf = Harpoon_bufh })
   vim.api.nvim_buf_set_keymap(Harpoon_bufh, 'n', 'q', "<Cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", { silent = true })
   vim.api.nvim_buf_set_keymap(Harpoon_bufh, 'n', '<ESC>', "<Cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", { silent = true })
   vim.api.nvim_buf_set_keymap(Harpoon_bufh, 'n', '<CR>', "<Cmd>lua require('harpoon.ui').select_menu_item()<CR>", {})
@@ -153,7 +153,7 @@ function M.nav_file(id)
   local old_bufnr = vim.api.nvim_get_current_buf()
 
   vim.api.nvim_set_current_buf(buf_id)
-  vim.api.nvim_buf_set_option(buf_id, 'buflisted', true)
+  vim.api.nvim_set_option_value('buflisted', true, { buf = buf_id })
   if set_row and mark.row and mark.col then
     vim.cmd(string.format(':call cursor(%d, %d)', mark.row, mark.col))
     log.debug(string.format('nav_file(): Setting cursor to row: %d, col: %d', mark.row, mark.col))
@@ -214,7 +214,7 @@ function M.notification(text)
 end
 
 function M.close_notification(bufnr)
-  vim.api.nvim_buf_delete(bufnr)
+  vim.api.nvim_buf_delete(bufnr, { force = true })
 end
 
 function M.nav_next()

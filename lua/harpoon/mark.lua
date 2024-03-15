@@ -262,6 +262,7 @@ function M.rm_file(file_name_or_buf_id)
     return
   end
 
+  ---@diagnostic disable-next-line
   harpoon.get_mark_config().marks[idx] = create_mark('')
   M.remove_empty_tail(false)
   emit_changed()
@@ -310,6 +311,7 @@ function M.set_current_at(idx)
 
   -- Remove it if it already exists
   if M.valid_index(current_idx) then
+    ---@diagnostic disable-next-line
     config.marks[current_idx] = create_mark('')
   end
 

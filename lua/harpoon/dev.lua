@@ -33,6 +33,7 @@ local log_key = os.time()
 local function override(key)
   local fn = M.log[key]
   M.log[key] = function(...)
+    ---@diagnostic disable-next-line
     fn(log_key, ...)
   end
 end

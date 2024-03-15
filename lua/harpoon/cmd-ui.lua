@@ -41,7 +41,7 @@ local function create_window()
     borderchars = borderchars,
   })
 
-  vim.api.nvim_win_set_option(win.border.win_id, 'winhl', 'Normal:HarpoonBorder')
+  vim.api.nvim_set_option_value('winhl', 'Normal:HarpoonBorder', { win = win.border.win_id })
 
   return {
     bufnr = bufnr,
@@ -81,12 +81,12 @@ function M.toggle_quick_menu()
     contents[idx] = cmd
   end
 
-  vim.api.nvim_win_set_option(Harpoon_cmd_win_id, 'number', true)
   vim.api.nvim_buf_set_name(Harpoon_cmd_bufh, 'harpoon-cmd-menu')
   vim.api.nvim_buf_set_lines(Harpoon_cmd_bufh, 0, #contents, false, contents)
-  vim.api.nvim_buf_set_option(Harpoon_cmd_bufh, 'filetype', 'harpoon')
-  vim.api.nvim_buf_set_option(Harpoon_cmd_bufh, 'buftype', 'acwrite')
-  vim.api.nvim_buf_set_option(Harpoon_cmd_bufh, 'bufhidden', 'delete')
+  vim.api.nvim_set_option_value('number', true, { win = Harpoon_cmd_win_id })
+  vim.api.nvim_set_option_value('filetype', 'harpoon', { buf = Harpoon_cmd_bufh })
+  vim.api.nvim_set_option_value('buftype', 'acwrite', { buf = Harpoon_cmd_bufh })
+  vim.api.nvim_set_option_value('bufhidden', 'delete', { buf = Harpoon_cmd_bufh })
   vim.api.nvim_buf_set_keymap(Harpoon_cmd_bufh, 'n', 'q', "<Cmd>lua require('harpoon.cmd-ui').toggle_quick_menu()<CR>", { silent = true })
   vim.api.nvim_buf_set_keymap(
     Harpoon_cmd_bufh,
