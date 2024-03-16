@@ -86,6 +86,11 @@ end
 --- Sets the icon and it's highlight group
 local function set_virtual_text()
   local lines = vim.api.nvim_buf_get_lines(Harpoon_bufh, 0, -1, true)
+  vim.api.nvim_buf_clear_namespace(Harpoon_bufh, nsid, 0, -1)
+
+  if #lines == 1 and #lines[1] == 0 then
+    return
+  end
 
   for idx, _ in pairs(lines) do
     local file_name = Marked.get_marked_file_name(idx)
@@ -98,13 +103,6 @@ local function set_virtual_text()
       virt_text_pos = 'inline',
     })
   end
-
-  -- vim.api.nvim_buf_set_extmark(Harpoon_bufh, nsid, 0, 0, {
-  --   virt_text = {
-  --     { ' ', 'Normal' },
-  --   },
-  --   virt_text_pos = 'inline',
-  -- })
 end
 
 ---@return string[]
@@ -135,7 +133,6 @@ local function create_autocmds()
     buffer = Harpoon_bufh,
     callback = function()
       vim.cmd('set nomodified')
-      -- vim.api.nvim_set_option_value('nomodified', true, { buf = Harpoon_bufh })
     end,
   })
 
@@ -144,6 +141,7 @@ local function create_autocmds()
       buffer = Harpoon_bufh,
       callback = function()
         require('harpoon.ui').on_menu_save()
+        set_virtual_text()
       end,
     })
   end
@@ -151,7 +149,6 @@ local function create_autocmds()
   vim.api.nvim_create_autocmd('BufLeave', {
     nested = true,
     once = true,
-    -- silent = true,
     callback = function()
       require('harpoon.ui').toggle_quick_menu()
     end,
@@ -194,7 +191,7 @@ function M.toggle_quick_menu()
   vim.api.nvim_buf_set_keymap(Harpoon_bufh, 'n', '<ESC>', "<Cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", { silent = true })
   vim.api.nvim_buf_set_keymap(Harpoon_bufh, 'n', '<CR>', "<Cmd>lua require('harpoon.ui').select_menu_item()<CR>", {})
 
-  create_autocmds()
+  create_autocmds(contents)
   set_virtual_text()
 
   -- vim.cmd(string.format("autocmd BufWriteCmd <buffer=%s> lua require('harpoon.ui').on_menu_save()", Harpoon_bufh))
