@@ -1,10 +1,7 @@
 local harpoon = require('harpoon')
-local popup = require('plenary.popup')
 local Marked = require('harpoon.mark')
 local utils = require('harpoon.utils')
 local log = require('harpoon.dev').log
--- local statuscol = require('statuscol')
--- local statuscol_builtin = require('statuscol.builtin')
 
 local cmd = vim.cmd
 
@@ -71,28 +68,33 @@ local function create_window()
   local config = harpoon.get_menu_config()
   local width = config.width or 60
   local height = config.height or 10
-  local borderchars = config.borderchars or { '─', '│', '─', '│', '╭', '╮', '╯', '╰' }
+  local borderchars = config.borderchars or { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
+
   local bufnr = buf_create(false, false)
 
-  local Harpoon_win_id, win = popup.create(bufnr, {
-    title = 'Harpoon',
-    title_pos = 'right',
-    titlehighlight = 'HarpoonTitle',
-    highlight = 'HarpoonWindow',
-    style = 'minimal',
-    line = math.floor(((vim.o.lines - height) / 2) - 1),
-    col = math.floor((vim.o.columns - width) / 2),
-    minwidth = width,
-    minheight = height,
-    borderchars = borderchars,
-    borderhighlight = 'HarpoonBorder',
-  })
+  ---@type [string, string][]
+  local border = vim
+    .iter(borderchars)
+    :map(function(c)
+      return { c, 'HarpoonBorder' }
+    end)
+    :totable()
 
-  set_option('winhl', 'Normal:HarpoonBorder', { win = win.border.win_id })
+  local win_id = win_open(bufnr, true, {
+    relative = 'editor',
+    style = 'minimal',
+    width = width,
+    height = height,
+    row = math.floor((vim.o.lines - height) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+    border = border,
+    title = { { ' Harpoon ', 'HarpoonTitle' } },
+    title_pos = 'center',
+  })
 
   return {
     bufnr = bufnr,
-    win_id = Harpoon_win_id,
+    win_id = win_id,
   }
 end
 
