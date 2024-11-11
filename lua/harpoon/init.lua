@@ -3,72 +3,63 @@ local utils = require('harpoon.utils')
 
 local config_path = vim.fn.stdpath('config')
 local data_path = vim.fn.stdpath('data')
-local user_config = string.format('%s/harpoon.json', config_path)
-local cache_config = string.format('%s/harpoon.json', data_path)
+local user_config_path = string.format('%s/harpoon.json', config_path)
+local cache_config_path = string.format('%s/harpoon.json', data_path)
+
+local function set_keymaps()
+  vim.keymap.set('n', '<C-V>', function()
+    local curline = vim.api.nvim_get_current_line()
+    local working_directory = vim.fn.getcwd() .. '/'
+    vim.cmd('vs')
+    vim.cmd('e ' .. working_directory .. curline)
+  end, { buffer = true, noremap = true, silent = true })
+
+  -- horizontal split (control+x)
+  vim.keymap.set('n', '<C-x>', function()
+    local curline = vim.api.nvim_get_current_line()
+    local working_directory = vim.fn.getcwd() .. '/'
+    vim.cmd('sp')
+    vim.cmd('e ' .. working_directory .. curline)
+  end, { buffer = true, noremap = true, silent = true })
+
+  -- new tab (control+t)
+  vim.keymap.set('n', '<C-t>', function()
+    local curline = vim.api.nvim_get_current_line()
+    local working_directory = vim.fn.getcwd() .. '/'
+    vim.cmd('tabnew')
+    vim.cmd('e ' .. working_directory .. curline)
+  end, { buffer = true, noremap = true, silent = true })
+end
 
 local M = {}
 
-local the_primeagen_harpoon = vim.api.nvim_create_augroup('THE_PRIMEAGEN_HARPOON', { clear = true })
-
+local group = vim.api.nvim_create_augroup('Harpoon', { clear = true })
 vim.api.nvim_create_autocmd({ 'BufLeave', 'VimLeave' }, {
   callback = function()
     require('harpoon.mark').store_offset()
   end,
-  group = the_primeagen_harpoon,
+  group = group,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'harpoon',
-  group = the_primeagen_harpoon,
-
-  callback = function()
-    -- Open harpoon file choice in useful ways
-    --
-    -- vertical split (control+v)
-    vim.keymap.set('n', '<C-V>', function()
-      local curline = vim.api.nvim_get_current_line()
-      local working_directory = vim.fn.getcwd() .. '/'
-      vim.cmd('vs')
-      vim.cmd('e ' .. working_directory .. curline)
-    end, { buffer = true, noremap = true, silent = true })
-
-    -- horizontal split (control+x)
-    vim.keymap.set('n', '<C-x>', function()
-      local curline = vim.api.nvim_get_current_line()
-      local working_directory = vim.fn.getcwd() .. '/'
-      vim.cmd('sp')
-      vim.cmd('e ' .. working_directory .. curline)
-    end, { buffer = true, noremap = true, silent = true })
-
-    -- new tab (control+t)
-    vim.keymap.set('n', '<C-t>', function()
-      local curline = vim.api.nvim_get_current_line()
-      local working_directory = vim.fn.getcwd() .. '/'
-      vim.cmd('tabnew')
-      vim.cmd('e ' .. working_directory .. curline)
-    end, { buffer = true, noremap = true, silent = true })
-  end,
+  group = group,
+  callback = set_keymaps,
 })
---[[
-{
-    projects = {
-        ["/path/to/director"] = {
-            term = {
-                cmds = {
-                }
-                ... is there anything that could be options?
-            },
-            mark = {
-                marks = {
-                }
-                ... is there anything that could be options?
-            }
-        }
-    },
-    ... high level settings
-}
---]]
-HarpoonConfig = HarpoonConfig or {}
+
+---@class Harpoon.Globals
+---@field mark_branch? boolean
+---@field save_on_toggle? boolean
+---@field save_on_change? boolean
+---@field excluded_filetypes? string[]
+
+---@class Harpoon.Marks
+---@field marks Harpoon.Mark[]
+
+---@class Harpoon.Config
+---@field global_settings Harpoon.Globals
+---@field projects any
+local HarpoonConfig = {}
 
 -- tbl_deep_extend does not work the way you would think
 local function merge_table_impl(t1, t2)
@@ -102,6 +93,7 @@ local function merge_tables(...)
   return out
 end
 
+---@return Harpoon.Config
 local function ensure_correct_config(config)
   local projects = config.projects
   local mark_key = mark_config_key(config.global_settings)
@@ -147,7 +139,7 @@ function M.save()
   -- first refresh from disk everything but our project
   M.refresh_projects_b4update()
 
-  Path:new(cache_config):write(vim.fn.json_encode(HarpoonConfig), 'w')
+  Path:new(cache_config_path):write(vim.fn.json_encode(HarpoonConfig), 'w')
 end
 
 local function read_config(local_config)
@@ -160,16 +152,16 @@ function M.setup(config)
     config = {}
   end
 
-  local ok, u_config = pcall(read_config, user_config)
+  local ok, user_config = pcall(read_config, user_config_path)
 
   if not ok then
-    u_config = {}
+    user_config = {}
   end
 
-  local ok2, c_config = pcall(read_config, cache_config)
+  local ok2, cache_config = pcall(read_config, cache_config_path)
 
   if not ok2 then
-    c_config = {}
+    cache_config = {}
   end
 
   local complete_config = merge_tables({
@@ -177,11 +169,10 @@ function M.setup(config)
     global_settings = {
       ['save_on_toggle'] = false,
       ['save_on_change'] = true,
-      ['enter_on_sendcmd'] = false,
       ['excluded_filetypes'] = { 'harpoon' },
       ['mark_branch'] = false,
     },
-  }, expand_dir(c_config), expand_dir(u_config), expand_dir(config))
+  }, expand_dir(cache_config), expand_dir(user_config), expand_dir(config))
 
   -- There was this issue where the vim.loop.cwd() didn't have marks or term, but had
   -- an object for vim.loop.cwd()
@@ -209,7 +200,7 @@ function M.refresh_projects_b4update()
 
   -- this reads a stale version of our project but up-to-date versions
   -- of all other projects
-  local ok2, c_config = pcall(read_config, cache_config)
+  local ok2, c_config = pcall(read_config, cache_config_path)
 
   if not ok2 then
     c_config = { projects = {} }
@@ -229,15 +220,16 @@ function M.refresh_projects_b4update()
   HarpoonConfig = complete_config
 end
 
+---@return Harpoon.Marks
 function M.get_mark_config()
-  return ensure_correct_config(HarpoonConfig).projects[mark_config_key()].mark
+  local config = ensure_correct_config(HarpoonConfig).projects[mark_config_key()].mark
+  Snacks.debug.inspect(config)
+  return config
 end
 
+---@return Harpoon.Menu
 function M.get_menu_config()
   return HarpoonConfig.menu or {}
 end
-
--- Sets a default config with no values
-M.setup()
 
 return M
