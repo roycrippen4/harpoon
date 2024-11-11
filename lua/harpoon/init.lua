@@ -195,19 +195,12 @@ function M.setup(config)
       ['enter_on_sendcmd'] = false,
       ['excluded_filetypes'] = { 'harpoon' },
       ['mark_branch'] = false,
-      ['tabline'] = false,
-      ['tabline_suffix'] = '   ',
-      ['tabline_prefix'] = '   ',
     },
   }, expand_dir(c_config), expand_dir(u_config), expand_dir(config))
 
   -- There was this issue where the vim.loop.cwd() didn't have marks or term, but had
   -- an object for vim.loop.cwd()
   ensure_correct_config(complete_config)
-
-  if complete_config.tabline then
-    require('harpoon.tabline').setup(complete_config)
-  end
 
   HarpoonConfig = complete_config
 

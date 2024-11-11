@@ -18,9 +18,9 @@ local function emit_changed()
     harpoon.save()
   end
 
-  if global_settings.tabline then
-    vim.cmd('redrawt')
-  end
+  -- if global_settings.tabline then
+  --   vim.cmd('redrawt')
+  -- end
 
   if not callbacks['changed'] then
     log.trace("_emit_changed(): no callbacks for 'changed', returning")
