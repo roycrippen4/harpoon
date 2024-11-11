@@ -227,22 +227,6 @@ function M.nav_file(id)
     return
   end
 
-  local nvim_tree = false
-  local logger = false
-
-  if vim.bo.ft == 'NvimTree' then
-    nvim_tree = true
-    vim.cmd('NvimTreeClose')
-  end
-
-  if vim.bo.ft == 'logger' then
-    if #vim.api.nvim_list_wins() == 1 then
-      vim.cmd('vsplit')
-    end
-    logger = true
-    require('logger'):close()
-  end
-
   local mark = Marked.get_marked_file(idx)
   local filename = vim.fs.normalize(mark.filename)
   local buf_id = get_or_create_buffer(filename)
@@ -269,14 +253,6 @@ function M.nav_file(id)
   end
 
   local cur_win = vim.api.nvim_get_current_win()
-  if nvim_tree then
-    vim.cmd('NvimTreeOpen')
-  end
-
-  if logger then
-    require('logger'):open()
-  end
-
   vim.api.nvim_set_current_win(cur_win)
 end
 
