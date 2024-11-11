@@ -1,7 +1,6 @@
 local harpoon = require('harpoon')
 local Marked = require('harpoon.mark')
 local utils = require('harpoon.utils')
-local log = require('harpoon.dev').log
 
 local M = {}
 
@@ -26,7 +25,6 @@ local function close_menu(force_save)
 end
 
 local function create_window()
-  log.trace('_create_window()')
   local config = harpoon.get_menu_config()
   local width = config.width or 60
   local height = config.height or 10
@@ -61,7 +59,6 @@ local function create_window()
 end
 
 local function get_menu_items()
-  log.trace('_get_menu_items()')
   local lines = vim.api.nvim_buf_get_lines(Harpoon_bufh, 0, -1, true)
   local indices = {}
 
@@ -160,7 +157,6 @@ local function create_autocmds()
 end
 
 function M.toggle_quick_menu()
-  log.trace('toggle_quick_menu()')
   if Harpoon_win_id ~= nil and vim.api.nvim_win_is_valid(Harpoon_win_id) then
     close_menu()
     return
@@ -206,7 +202,6 @@ function M.select_menu_item()
 end
 
 function M.on_menu_save()
-  log.trace('on_menu_save()')
   Marked.set_mark_list(get_menu_items())
 end
 
@@ -220,10 +215,8 @@ local function get_or_create_buffer(filename)
 end
 
 function M.nav_file(id)
-  log.trace('nav_file(): Navigating to', id)
   local idx = Marked.get_index_of(id)
   if not Marked.valid_index(idx) then
-    log.debug('nav_file(): No mark exists for id', id)
     return
   end
 
@@ -238,7 +231,6 @@ function M.nav_file(id)
   vim.api.nvim_set_option_value('buflisted', true, { buf = buf_id })
   if set_row and mark.row and mark.col then
     vim.cmd(string.format(':call cursor(%d, %d)', mark.row, mark.col))
-    log.debug(string.format('nav_file(): Setting cursor to row: %d, col: %d', mark.row, mark.col))
   end
 
   local old_bufinfo = vim.fn.getbufinfo(old_bufnr)
@@ -303,7 +295,6 @@ function M.close_notification(bufnr)
 end
 
 function M.nav_next()
-  log.trace('nav_next()')
   local current_index = Marked.get_current_index()
   local number_of_items = Marked.get_length()
 
@@ -320,7 +311,6 @@ function M.nav_next()
 end
 
 function M.nav_prev()
-  log.trace('nav_prev()')
   local current_index = Marked.get_current_index()
   local number_of_items = Marked.get_length()
 

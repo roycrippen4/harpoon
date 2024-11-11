@@ -1,7 +1,5 @@
 local Path = require('plenary.path')
 local utils = require('harpoon.utils')
-local Dev = require('harpoon.dev')
-local log = Dev.log
 
 local config_path = vim.fn.stdpath('config')
 local data_path = vim.fn.stdpath('data')
@@ -97,7 +95,6 @@ local function mark_config_key(global_settings)
 end
 
 local function merge_tables(...)
-  log.trace('_merge_tables()')
   local out = {}
   for i = 1, select('#', ...) do
     merge_table_impl(out, select(i, ...))
@@ -106,11 +103,9 @@ local function merge_tables(...)
 end
 
 local function ensure_correct_config(config)
-  log.trace('_ensure_correct_config()')
   local projects = config.projects
   local mark_key = mark_config_key(config.global_settings)
   if projects[mark_key] == nil then
-    log.debug('ensure_correct_config(): No config found for:', mark_key)
     projects[mark_key] = {
       mark = { marks = {} },
     }
@@ -118,7 +113,6 @@ local function ensure_correct_config(config)
 
   local proj = projects[mark_key]
   if proj.mark == nil then
-    log.debug('ensure_correct_config(): No marks found for', mark_key)
     proj.mark = { marks = {} }
   end
 
@@ -137,8 +131,6 @@ local function ensure_correct_config(config)
 end
 
 local function expand_dir(config)
-  log.trace('_expand_dir(): Config pre-expansion:', config)
-
   local projects = config.projects or {}
   for k in pairs(projects) do
     local expanded_path = Path.new(k):expand()
@@ -148,7 +140,6 @@ local function expand_dir(config)
     end
   end
 
-  log.trace('_expand_dir(): Config post-expansion:', config)
   return config
 end
 
@@ -156,19 +147,15 @@ function M.save()
   -- first refresh from disk everything but our project
   M.refresh_projects_b4update()
 
-  log.trace('save(): Saving cache config to', cache_config)
   Path:new(cache_config):write(vim.fn.json_encode(HarpoonConfig), 'w')
 end
 
 local function read_config(local_config)
-  log.trace('_read_config():', local_config)
   return vim.json.decode(Path:new(local_config):read())
 end
 
 -- 1. saved.  Where do we save?
 function M.setup(config)
-  log.trace('setup(): Setting up...')
-
   if not config then
     config = {}
   end
@@ -176,14 +163,12 @@ function M.setup(config)
   local ok, u_config = pcall(read_config, user_config)
 
   if not ok then
-    log.debug('setup(): No user config present at', user_config)
     u_config = {}
   end
 
   local ok2, c_config = pcall(read_config, cache_config)
 
   if not ok2 then
-    log.debug('setup(): No cache config present at', cache_config)
     c_config = {}
   end
 
@@ -203,19 +188,14 @@ function M.setup(config)
   ensure_correct_config(complete_config)
 
   HarpoonConfig = complete_config
-
-  log.debug('setup(): Complete config', HarpoonConfig)
-  log.trace('setup(): log_key', Dev.get_log_key())
 end
 
 function M.get_global_settings()
-  log.trace('get_global_settings()')
   return HarpoonConfig.global_settings
 end
 
 -- refresh all projects from disk, except our current one
 function M.refresh_projects_b4update()
-  log.trace('refresh_projects_b4update(): refreshing other projects', cache_config)
   -- save current runtime version of our project config for merging back in later
   local cwd = mark_config_key()
   local current_p_config = {
@@ -232,7 +212,6 @@ function M.refresh_projects_b4update()
   local ok2, c_config = pcall(read_config, cache_config)
 
   if not ok2 then
-    log.debug('refresh_projects_b4update(): No cache config present at', cache_config)
     c_config = { projects = {} }
   end
   -- don't override non-project config in HarpoonConfig later
@@ -248,17 +227,13 @@ function M.refresh_projects_b4update()
   ensure_correct_config(complete_config)
 
   HarpoonConfig = complete_config
-  log.debug('refresh_projects_b4update(): Complete config', HarpoonConfig)
-  log.trace('refresh_projects_b4update(): log_key', Dev.get_log_key())
 end
 
 function M.get_mark_config()
-  log.trace('get_mark_config()')
   return ensure_correct_config(HarpoonConfig).projects[mark_config_key()].mark
 end
 
 function M.get_menu_config()
-  log.trace('get_menu_config()')
   return HarpoonConfig.menu or {}
 end
 
