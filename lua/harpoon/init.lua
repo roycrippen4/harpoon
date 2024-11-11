@@ -113,9 +113,6 @@ local function ensure_correct_config(config)
     log.debug('ensure_correct_config(): No config found for:', mark_key)
     projects[mark_key] = {
       mark = { marks = {} },
-      term = {
-        cmds = {},
-      },
     }
   end
 
@@ -123,11 +120,6 @@ local function ensure_correct_config(config)
   if proj.mark == nil then
     log.debug('ensure_correct_config(): No marks found for', mark_key)
     proj.mark = { marks = {} }
-  end
-
-  if proj.term == nil then
-    log.debug('ensure_correct_config(): No terminal commands found for', mark_key)
-    proj.term = { cmds = {} }
   end
 
   local marks = proj.mark.marks
@@ -267,11 +259,6 @@ function M.refresh_projects_b4update()
   log.trace('refresh_projects_b4update(): log_key', Dev.get_log_key())
 end
 
-function M.get_term_config()
-  log.trace('get_term_config()')
-  return ensure_correct_config(HarpoonConfig).projects[utils.project_key()].term
-end
-
 function M.get_mark_config()
   log.trace('get_mark_config()')
   return ensure_correct_config(HarpoonConfig).projects[mark_config_key()].mark
@@ -280,11 +267,6 @@ end
 function M.get_menu_config()
   log.trace('get_menu_config()')
   return HarpoonConfig.menu or {}
-end
-
--- should only be called for debug purposes
-function M.print_config()
-  print(vim.inspect(HarpoonConfig))
 end
 
 -- Sets a default config with no values
