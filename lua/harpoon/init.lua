@@ -223,7 +223,7 @@ end
 ---@return Harpoon.Marks
 function M.get_mark_config()
   local config = ensure_correct_config(HarpoonConfig).projects[mark_config_key()].mark
-  Snacks.debug.inspect(config)
+  -- Snacks.debug.inspect(config)
   return config
 end
 
